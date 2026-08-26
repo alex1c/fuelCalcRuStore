@@ -1,0 +1,34 @@
+{
+  "expo": {
+    "name": "Автожурнал",
+    "slug": "auto-journal",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "scheme": "auto-journal",
+    "experiments": {
+      "typedRoutes": false
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.calculatorplatform.autojournal"
+    },
+    "android": {
+      "package": "com.calculatorplatform.autojournal",
+      "versionCode": 1,
+      "adaptiveIcon": {
+        "backgroundColor": "#EEF3F8",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "plugins": [
+      "expo-router",
+      "expo-dev-client",
+      "expo-sqlite"
+    ]
+  }
+}

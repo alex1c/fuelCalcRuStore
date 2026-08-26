@@ -1,0 +1,65 @@
+# dependencies
+node_modules/
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native
+.kotlin/
+*.orig.*
+*.jks
+*.keystore
+*.p8
+*.p12
+*.key
+*.mobileprovision
+credentials/keystore.properties
+credentials/*.jks
+credentials/*.keystore
+credentials/*.p12
+.package.json.pre-production-backup
+
+# Metro
+.metro-health-check*
+
+# debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# macOS
+.DS_Store
+*.pem
+
+# local env files — never commit real secrets
+.env
+.env.local
+.env.*.local
+
+# typescript
+*.tsbuildinfo
+
+# generated native folders
+/ios
+/android
+
+# build artifacts
+*.apk
+*.aab
+*.ipa
+/release-artifacts/
+
+# Android Studio / IDE local files
+.idea/
+*.iml
+local.properties
+
+# test coverage
+coverage/
+
+# local smoke / agent temp artifacts (never commit)
+.tmp*
+.tmp-*/
