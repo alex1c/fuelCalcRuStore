@@ -83,6 +83,15 @@ export const MIGRATIONS: readonly SchemaMigration[] = [
 			);`,
 		],
 	},
+	{
+		version: 2,
+		name: 'maintenance_remind_flag',
+		sql: [
+			// Local date reminders for maintenance (no GPS/odometer background jobs).
+			`ALTER TABLE maintenance_items
+				ADD COLUMN remind INTEGER NOT NULL DEFAULT 0;`,
+		],
+	},
 ]
 
 export const LATEST_SCHEMA_VERSION = MIGRATIONS[MIGRATIONS.length - 1].version

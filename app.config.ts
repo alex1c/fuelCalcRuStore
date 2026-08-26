@@ -14,6 +14,14 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 	const plugins: NonNullable<ExpoConfig['plugins']> = [
 		'expo-router',
 		'expo-sqlite',
+		'expo-sharing',
+		[
+			'expo-notifications',
+			{
+				icon: './assets/icon.png',
+				color: '#1B6CA8',
+			},
+		],
 	]
 
 	if (!isProduction) {
@@ -46,13 +54,15 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 				monochromeImage: './assets/android-icon-monochrome.png',
 			},
 			predictiveBackGestureEnabled: false,
-			...(isProduction
-				? {
-						blockedPermissions: [
-							'android.permission.SYSTEM_ALERT_WINDOW',
-						],
-					}
-				: {}),
+			// Share/SAF + notifications: block legacy storage; keep overlay only in prod.
+			blockedPermissions: [
+				'android.permission.READ_EXTERNAL_STORAGE',
+				'android.permission.WRITE_EXTERNAL_STORAGE',
+				'android.permission.MANAGE_EXTERNAL_STORAGE',
+				...(isProduction
+					? (['android.permission.SYSTEM_ALERT_WINDOW'] as const)
+					: []),
+			],
 		},
 		plugins,
 		extra: {

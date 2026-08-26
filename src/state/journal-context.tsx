@@ -75,6 +75,12 @@ export function JournalProvider({ children }: { children: ReactNode }) {
 			setActiveId(nextActive)
 			setError(null)
 			setIsReady(true)
+
+			// Silent reschedule — no permission prompt on startup.
+			void import('@/notifications/reminders-service').then(
+				({ rescheduleAllMaintenanceReminders }) =>
+					rescheduleAllMaintenanceReminders(nextMaintenance),
+			)
 		} catch (err) {
 			const message = err instanceof Error ? err.message : 'Database error'
 			setError(message)

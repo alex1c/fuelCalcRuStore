@@ -20,6 +20,8 @@ export interface MaintenanceItem {
 	intervalDays?: number
 	note?: string
 	active: boolean
+	/** When true and a due date exists, schedule local date reminders. */
+	remind: boolean
 	createdAt: string
 	updatedAt: string
 }

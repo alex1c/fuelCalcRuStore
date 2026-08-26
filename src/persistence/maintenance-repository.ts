@@ -40,8 +40,8 @@ export async function upsertMaintenance(item: MaintenanceItem): Promise<void> {
 	await db.runAsync(
 		`INSERT INTO maintenance_items (
 			id, vehicle_id, title, last_service_date, last_service_odometer_km,
-			interval_km, interval_days, note, active, created_at, updated_at
-		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+			interval_km, interval_days, note, active, remind, created_at, updated_at
+		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 		ON CONFLICT(id) DO UPDATE SET
 			vehicle_id = excluded.vehicle_id,
 			title = excluded.title,
@@ -51,6 +51,7 @@ export async function upsertMaintenance(item: MaintenanceItem): Promise<void> {
 			interval_days = excluded.interval_days,
 			note = excluded.note,
 			active = excluded.active,
+			remind = excluded.remind,
 			updated_at = excluded.updated_at;`,
 		[
 			item.id,
@@ -62,6 +63,7 @@ export async function upsertMaintenance(item: MaintenanceItem): Promise<void> {
 			item.intervalDays ?? null,
 			item.note ?? null,
 			item.active ? 1 : 0,
+			item.remind ? 1 : 0,
 			item.createdAt,
 			item.updatedAt,
 		],

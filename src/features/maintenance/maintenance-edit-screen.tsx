@@ -12,6 +12,11 @@ import {
 	getMaintenanceById,
 	upsertMaintenance,
 } from '@/persistence'
+import {
+	cancelMaintenanceReminders,
+	ensureNotificationPermission,
+	syncMaintenanceReminders,
+} from '@/notifications/reminders-service'
 import { useJournal } from '@/state/journal-context'
 import { colors, spacing } from '@/theme/tokens'
 import {
@@ -39,6 +44,7 @@ export function MaintenanceEditScreen() {
 	const [intervalDays, setIntervalDays] = useState('')
 	const [note, setNote] = useState('')
 	const [active, setActive] = useState(true)
+	const [remind, setRemind] = useState(false)
 	const [createdAt, setCreatedAt] = useState<string | null>(null)
 	const [saving, setSaving] = useState(false)
 	const [errors, setErrors] = useState<Record<string, string>>({})
@@ -69,6 +75,7 @@ export function MaintenanceEditScreen() {
 			)
 			setNote(item.note ?? '')
 			setActive(item.active)
+			setRemind(item.remind)
 			setCreatedAt(item.createdAt)
 		})()
 	}, [editingId, activeVehicle])
@@ -148,6 +155,7 @@ export function MaintenanceEditScreen() {
 			intervalDays: intervalDaysValue,
 			note: note.trim() || undefined,
 			active,
+			remind,
 			createdAt: createdAt ?? now,
 			updatedAt: now,
 		}
@@ -155,13 +163,28 @@ export function MaintenanceEditScreen() {
 
 	async function handleSave() {
 		const now = new Date().toISOString()
-		const item = buildItem(now)
+		let item = buildItem(now)
 		if (!item) {
 			return
 		}
+
+		// Request permission only when the user turns reminders on.
+		if (item.remind) {
+			const allowed = await ensureNotificationPermission()
+			if (!allowed) {
+				Alert.alert(
+					'Уведомления',
+					'Без разрешения напоминания не будут доставлены. Запись всё равно можно сохранить.',
+				)
+				item = { ...item, remind: false }
+				setRemind(false)
+			}
+		}
+
 		setSaving(true)
 		try {
 			await upsertMaintenance(item)
+			await syncMaintenanceReminders(item)
 			await refresh()
 			router.back()
 		} catch (err) {
@@ -193,6 +216,7 @@ export function MaintenanceEditScreen() {
 			nowIso: now,
 		})
 		await upsertMaintenance(completed)
+		await syncMaintenanceReminders(completed)
 		await refresh()
 		router.back()
 	}
@@ -208,6 +232,7 @@ export function MaintenanceEditScreen() {
 				style: 'destructive',
 				onPress: () => {
 					void (async () => {
+						await cancelMaintenanceReminders(editingId)
 						await deleteMaintenance(editingId)
 						await refresh()
 						router.back()
@@ -287,6 +312,20 @@ export function MaintenanceEditScreen() {
 					/>
 				</View>
 
+				<View style={styles.switchRow}>
+					<View style={{ flex: 1 }}>
+						<Text style={styles.switchLabel}>Напомнить</Text>
+						<Text style={styles.hint}>
+							Локально за 7 дней и в день следующего ТО по дате
+						</Text>
+					</View>
+					<Switch
+						value={remind}
+						onValueChange={setRemind}
+						trackColor={{ true: colors.accent }}
+					/>
+				</View>
+
 				<PrimaryButton
 					label={saving ? 'Сохранение…' : 'Сохранить'}
 					onPress={() => {
@@ -354,6 +393,12 @@ const styles = StyleSheet.create({
 	switchLabel: {
 		fontSize: 16,
 		color: colors.textPrimary,
+	},
+	hint: {
+		marginTop: 2,
+		fontSize: 12,
+		color: colors.textMuted,
+		paddingRight: spacing.sm,
 	},
 	muted: {
 		color: colors.textMuted,

@@ -1,6 +1,5 @@
 /**
- * Versioned JSON backup document — restore format for a future UI.
- * CSV is intentionally not used for restore.
+ * Versioned JSON backup document — full restore format (not CSV).
  */
 
 import type { Expense } from '@/domain/expenses/types'
@@ -28,7 +27,13 @@ export interface AutoJournalBackupV1 {
 	settings: AppSettings
 }
 
-export function createEmptyBackup(appVersion: string, createdAt: string): AutoJournalBackupV1 {
+/** Any supported backup document after migration to current schema. */
+export type AutoJournalBackup = AutoJournalBackupV1
+
+export function createEmptyBackup(
+	appVersion: string,
+	createdAt: string,
+): AutoJournalBackupV1 {
 	return {
 		format: BACKUP_FORMAT,
 		version: BACKUP_VERSION,
@@ -44,8 +49,19 @@ export function createEmptyBackup(appVersion: string, createdAt: string): AutoJo
 	}
 }
 
-/** Suggested download file name for a future share/export flow. */
+/**
+ * Suggested share/save file name: auto-journal-backup-YYYY-MM-DD-HHmm.json
+ */
 export function backupFileName(dateIso: string): string {
-	const day = dateIso.slice(0, 10)
-	return `auto-journal-backup-${day}.json`
+	const date = new Date(dateIso)
+	if (Number.isNaN(date.getTime())) {
+		return 'auto-journal-backup-unknown.json'
+	}
+	// UTC stamp keeps filenames deterministic across devices.
+	const stamp = date
+		.toISOString()
+		.slice(0, 16)
+		.replace('T', '-')
+		.replace(':', '')
+	return `auto-journal-backup-${stamp}.json`
 }

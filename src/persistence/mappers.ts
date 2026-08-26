@@ -51,6 +51,7 @@ export interface MaintenanceRow {
 	interval_days: number | null
 	note: string | null
 	active: number
+	remind: number | null
 	created_at: string
 	updated_at: string
 }
@@ -109,6 +110,7 @@ export function mapMaintenanceRow(row: MaintenanceRow): MaintenanceItem {
 		intervalDays: row.interval_days ?? undefined,
 		note: row.note ?? undefined,
 		active: row.active === 1,
+		remind: (row.remind ?? 0) === 1,
 		createdAt: row.created_at,
 		updatedAt: row.updated_at,
 	}

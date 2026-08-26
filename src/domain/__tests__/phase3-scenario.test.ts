@@ -235,6 +235,7 @@ describe('Phase 3 scenario smoke (domain)', () => {
 			lastServiceOdometerKm: 10000,
 			intervalKm: 10000,
 			active: true,
+			remind: false,
 			createdAt: '2026-08-01T00:00:00.000Z',
 			updatedAt: '2026-08-01T00:00:00.000Z',
 		}

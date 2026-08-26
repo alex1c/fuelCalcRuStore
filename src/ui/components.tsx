@@ -60,11 +60,23 @@ export function PrimaryButton({ label, onPress, disabled }: PrimaryButtonProps) 
 interface SecondaryButtonProps {
 	label: string
 	onPress: () => void
+	disabled?: boolean
 }
 
-export function SecondaryButton({ label, onPress }: SecondaryButtonProps) {
+export function SecondaryButton({
+	label,
+	onPress,
+	disabled,
+}: SecondaryButtonProps) {
 	return (
-		<Pressable onPress={onPress} style={styles.secondaryButton}>
+		<Pressable
+			onPress={onPress}
+			disabled={disabled}
+			style={[
+				styles.secondaryButton,
+				disabled ? styles.buttonDisabled : null,
+			]}
+		>
 			<Text style={styles.secondaryLabel}>{label}</Text>
 		</Pressable>
 	)

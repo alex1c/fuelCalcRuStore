@@ -5,6 +5,7 @@ export {
 	backupFileName,
 	createEmptyBackup,
 	type AppSettings,
+	type AutoJournalBackup,
 	type AutoJournalBackupV1,
 } from './backup-types'
 export {
