@@ -27,9 +27,10 @@ keytool -genkeypair -v -storetype PKCS12 `
   -keyalg RSA -keysize 2048 -validity 10000
 ```
 
-Copy `keystore.properties.example` → `keystore.properties` and fill absolute
-`storeFile` paths. Then wire Gradle signing the same way as sibling RuStore apps
-(`apply:release-signing` / production prebuild) when those scripts are added.
+Copy `keystore.properties.example` → `keystore.properties` and fill the absolute
+`storeFile` path. `APP_VARIANT=production` enables the Expo signing plugin during
+prebuild; release tasks then use only this production signing config and fail
+closed while the properties file is absent.
 
 Until the keystore exists locally:
 

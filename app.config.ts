@@ -18,14 +18,16 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 		[
 			'expo-notifications',
 			{
-				icon: './assets/icon.png',
-				color: '#1B6CA8',
+				icon: './assets/autojournal-icon.png',
+				color: '#0B4FA3',
 			},
 		],
 	]
 
 	if (!isProduction) {
 		plugins.splice(1, 0, 'expo-dev-client')
+	} else {
+		plugins.push('./scripts/with-release-signing.js')
 	}
 
 	return {
@@ -34,7 +36,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 		slug: 'auto-journal',
 		version: '1.0.0',
 		orientation: 'portrait',
-		icon: './assets/icon.png',
+		icon: './assets/autojournal-icon.png',
 		userInterfaceStyle: 'light',
 		scheme: 'auto-journal',
 		experiments: {
@@ -48,10 +50,8 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 			package: 'com.calculatorplatform.autojournal',
 			versionCode: 1,
 			adaptiveIcon: {
-				backgroundColor: '#EEF3F8',
-				foregroundImage: './assets/android-icon-foreground.png',
-				backgroundImage: './assets/android-icon-background.png',
-				monochromeImage: './assets/android-icon-monochrome.png',
+				backgroundColor: '#0B4FA3',
+				foregroundImage: './assets/autojournal-adaptive-foreground.png',
 			},
 			predictiveBackGestureEnabled: false,
 			// Share/SAF + notifications: block legacy storage; keep overlay only in prod.
@@ -67,7 +67,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 		plugins,
 		extra: {
 			appVariant: isProduction ? 'production' : 'development',
-			splashAsset: './assets/splash-icon.png',
+			splashAsset: './assets/autojournal-icon.png',
 		},
 	}
 }

@@ -21,7 +21,14 @@ import { expenseCategoryLabel } from '@/ui/labels'
 /** Lightweight statistics — numbers first, optional simple bars + rare interstitial. */
 export function StatsScreen() {
 	const { activeVehicle, activeFuelEntries, activeExpenses } = useJournal()
-	const now = new Date()
+	// Stable calendar snapshot — prevents useMemo churn from `new Date()` each render.
+	const clock = useMemo(() => {
+		const date = new Date()
+		return {
+			year: date.getFullYear(),
+			month: date.getMonth() + 1,
+		}
+	}, [])
 
 	useEffect(() => {
 		getAnalyticsService().track('statistics_opened')
@@ -52,9 +59,9 @@ export function StatsScreen() {
 			activeFuelEntries,
 			activeExpenses,
 			activeVehicle.id,
-			monthPeriod(now.getFullYear(), now.getMonth() + 1),
+			monthPeriod(clock.year, clock.month),
 		)
-	}, [activeVehicle, activeFuelEntries, activeExpenses, now])
+	}, [activeVehicle, activeFuelEntries, activeExpenses, clock.year, clock.month])
 
 	const thisYear = useMemo(() => {
 		if (!activeVehicle) {
@@ -64,9 +71,9 @@ export function StatsScreen() {
 			activeFuelEntries,
 			activeExpenses,
 			activeVehicle.id,
-			yearPeriod(now.getFullYear()),
+			yearPeriod(clock.year),
 		)
-	}, [activeVehicle, activeFuelEntries, activeExpenses, now])
+	}, [activeVehicle, activeFuelEntries, activeExpenses, clock.year])
 
 	const costPerKm = useMemo(() => {
 		if (!activeVehicle) {
@@ -85,7 +92,7 @@ export function StatsScreen() {
 		}
 		const bars: { label: string; value: number }[] = []
 		for (let i = 5; i >= 0; i -= 1) {
-			const date = new Date(now.getFullYear(), now.getMonth() - i, 1)
+			const date = new Date(clock.year, clock.month - 1 - i, 1)
 			const period = monthPeriod(date.getFullYear(), date.getMonth() + 1)
 			const total = aggregateCosts(
 				activeFuelEntries,
@@ -99,7 +106,7 @@ export function StatsScreen() {
 			})
 		}
 		return bars
-	}, [activeVehicle, activeFuelEntries, activeExpenses, now])
+	}, [activeVehicle, activeFuelEntries, activeExpenses, clock.year, clock.month])
 
 	const consumptionBars = useMemo(() => {
 		if (consumption?.status !== 'ok') {
@@ -191,7 +198,7 @@ export function StatsScreen() {
 						<Line
 							label="В среднем за месяц (год)"
 							value={formatMoneyKopecks(
-								Math.round(thisYear.totalKopecks / (now.getMonth() + 1)),
+								Math.round(thisYear.totalKopecks / clock.month),
 							)}
 						/>
 					) : null}

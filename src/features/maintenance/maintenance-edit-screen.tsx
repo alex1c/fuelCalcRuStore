@@ -38,8 +38,10 @@ export function MaintenanceEditScreen() {
 	const { activeVehicle, refresh } = useJournal()
 
 	const [title, setTitle] = useState('')
-	const [lastDate, setLastDate] = useState('')
-	const [lastOdo, setLastOdo] = useState('')
+	const [lastDate, setLastDate] = useState(() => toDateInput(new Date()))
+	const [lastOdo, setLastOdo] = useState(() =>
+		activeVehicle ? String(activeVehicle.currentOdometerKm) : '',
+	)
 	// Sensible default interval so new items are immediately due-aware.
 	const [intervalKm, setIntervalKm] = useState('10000')
 	const [intervalDays, setIntervalDays] = useState('')
@@ -52,12 +54,9 @@ export function MaintenanceEditScreen() {
 
 	useEffect(() => {
 		if (!editingId) {
-			if (activeVehicle) {
-				setLastOdo(String(activeVehicle.currentOdometerKm))
-			}
-			setLastDate(toDateInput(new Date()))
 			return
 		}
+		// Load existing maintenance row from SQLite; setState after await is intentional.
 		void (async () => {
 			const item = await getMaintenanceById(editingId)
 			if (!item) {
@@ -79,7 +78,7 @@ export function MaintenanceEditScreen() {
 			setRemind(item.remind)
 			setCreatedAt(item.createdAt)
 		})()
-	}, [editingId, activeVehicle])
+	}, [editingId])
 
 	if (!activeVehicle) {
 		return (

@@ -36,9 +36,21 @@ export function HomeScreen() {
 		activeMaintenance,
 	} = useJournal()
 
-	const now = new Date()
-	const month = monthPeriod(now.getFullYear(), now.getMonth() + 1)
-	const year = yearPeriod(now.getFullYear())
+	// Stable calendar snapshot for the screen mount (avoid Date in memo deps).
+	const clock = useMemo(() => {
+		const date = new Date()
+		return {
+			year: date.getFullYear(),
+			month: date.getMonth() + 1,
+			iso: date.toISOString(),
+			date,
+		}
+	}, [])
+	const month = useMemo(
+		() => monthPeriod(clock.year, clock.month),
+		[clock.year, clock.month],
+	)
+	const year = useMemo(() => yearPeriod(clock.year), [clock.year])
 
 	const consumption = useMemo(() => {
 		if (!activeVehicle) {
@@ -74,7 +86,7 @@ export function HomeScreen() {
 		if (!activeVehicle) {
 			return null
 		}
-		const nowIso = now.toISOString()
+		const nowIso = clock.iso
 		const ranked = activeMaintenance
 			.map((item) => ({
 				item,
@@ -93,7 +105,7 @@ export function HomeScreen() {
 			return Math.min(aKm, aDays * 30) - Math.min(bKm, bDays * 30)
 		})
 		return ranked[0] ?? null
-	}, [activeMaintenance, activeVehicle, now])
+	}, [activeMaintenance, activeVehicle, clock.iso])
 
 	const recent = useMemo(() => {
 		const fuel = activeFuelEntries.map((e) => ({
@@ -162,7 +174,7 @@ export function HomeScreen() {
 			: null
 
 	const monthSpendText = monthCosts
-		? `${formatMoneyKopecks(monthCosts.totalKopecks)} в ${monthName(now)}`
+		? `${formatMoneyKopecks(monthCosts.totalKopecks)} в ${monthName(clock.date)}`
 		: null
 
 	const toText = formatNearestMaintenance(nearestMaintenance)
@@ -364,6 +376,7 @@ const styles = StyleSheet.create({
 		fontWeight: '700',
 		color: colors.textPrimary,
 		marginBottom: spacing.md,
+		flexShrink: 1,
 	},
 	subtitle: {
 		fontSize: 15,
@@ -378,6 +391,7 @@ const styles = StyleSheet.create({
 		fontWeight: '800',
 		color: colors.textPrimary,
 		letterSpacing: -0.5,
+		flexShrink: 1,
 	},
 	heroLabel: {
 		fontSize: 14,
@@ -392,6 +406,7 @@ const styles = StyleSheet.create({
 		fontSize: 16,
 		fontWeight: '600',
 		color: colors.textPrimary,
+		flexShrink: 1,
 	},
 	secondaryMuted: {
 		fontSize: 14,

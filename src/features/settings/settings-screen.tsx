@@ -67,6 +67,8 @@ export function SettingsScreen() {
 	}, [])
 
 	useEffect(() => {
+		// External permission status on mount — setState after await is intentional.
+		// eslint-disable-next-line react-hooks/set-state-in-effect -- async permission probe
 		void refreshPermission()
 	}, [refreshPermission])
 

@@ -1,7 +1,6 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { ScrollView, StyleSheet, Text, View } from 'react-native'
 import { useFocusEffect } from 'expo-router'
-import { useCallback } from 'react'
 import {
 	calculateCostPerKm,
 } from '@/domain/expenses'

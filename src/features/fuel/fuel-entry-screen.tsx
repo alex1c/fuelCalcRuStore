@@ -45,7 +45,11 @@ export function FuelEntryScreen() {
 	const { activeVehicle, refresh } = useJournal()
 
 	const [recordedAtLocal, setRecordedAtLocal] = useState(toLocalInput(new Date()))
-	const [odometer, setOdometer] = useState('')
+	const [odometer, setOdometer] = useState(() =>
+		activeVehicle && !editingId
+			? String(activeVehicle.currentOdometerKm)
+			: '',
+	)
 	const [liters, setLiters] = useState('')
 	const [price, setPrice] = useState('')
 	const [total, setTotal] = useState('')
@@ -59,9 +63,6 @@ export function FuelEntryScreen() {
 
 	useEffect(() => {
 		if (!editingId) {
-			if (activeVehicle) {
-				setOdometer(String(activeVehicle.currentOdometerKm))
-			}
 			return
 		}
 
@@ -84,7 +85,7 @@ export function FuelEntryScreen() {
 			setCreatedAt(entry.createdAt)
 			setLoaded(true)
 		})()
-	}, [editingId, activeVehicle])
+	}, [editingId])
 
 	const preview = useMemo(() => {
 		const litersParsed = parseUserDecimalNumber(liters)

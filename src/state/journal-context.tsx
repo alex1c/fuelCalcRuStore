@@ -90,6 +90,8 @@ export function JournalProvider({ children }: { children: ReactNode }) {
 	}, [])
 
 	useEffect(() => {
+		// Mount bootstrap: load journal from SQLite once. setState after await is intentional.
+		// eslint-disable-next-line react-hooks/set-state-in-effect -- async store hydrate on mount
 		void refresh()
 	}, [refresh])
 
