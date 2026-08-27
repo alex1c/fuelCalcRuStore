@@ -7,6 +7,7 @@ module.exports = {
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
     '^expo/virtual/env$': '<rootDir>/jest/expo-virtual-env-mock.js',
+    '^yandex-mobile-ads$': '<rootDir>/jest/yandex-mobile-ads-mock.js',
   },
   collectCoverageFrom: [
     'src/domain/**/*.{ts,tsx}',

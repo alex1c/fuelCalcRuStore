@@ -10,6 +10,7 @@ import {
 	getVehicleById,
 	upsertVehicle,
 } from '@/persistence'
+import { getAnalyticsService } from '@/services/analytics'
 import { useJournal } from '@/state/journal-context'
 import { colors, spacing } from '@/theme/tokens'
 import {
@@ -96,6 +97,9 @@ export function VehicleEditScreen() {
 			}
 			await upsertVehicle(vehicle)
 			await selectVehicle(vehicle.id)
+			if (!editingId) {
+				getAnalyticsService().track('vehicle_created')
+			}
 			await refresh()
 			router.back()
 		} catch (err) {

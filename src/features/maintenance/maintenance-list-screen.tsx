@@ -60,18 +60,9 @@ export function MaintenanceListScreen() {
 						<View style={{ flex: 1 }}>
 							<Text style={styles.name}>{row.item.title}</Text>
 							{row.status.hasSchedule ? (
-								<>
-									{row.status.remainingKm !== undefined ? (
-										<Text style={styles.meta}>
-											Осталось {row.status.remainingKm.toLocaleString('ru-RU')} км
-										</Text>
-									) : null}
-									{row.status.remainingDays !== undefined ? (
-										<Text style={styles.meta}>
-											Осталось {row.status.remainingDays} дн.
-										</Text>
-									) : null}
-								</>
+								<Text style={styles.meta}>
+									{formatDueLine(row.status)}
+								</Text>
 							) : (
 								<Text style={styles.meta}>Интервал не задан</Text>
 							)}
@@ -89,6 +80,31 @@ export function MaintenanceListScreen() {
 			/>
 		</Screen>
 	)
+}
+
+function formatDueLine(status: {
+	urgency: MaintenanceUrgency
+	remainingKm?: number
+	remainingDays?: number
+}): string {
+	const parts: string[] = []
+	if (status.remainingKm !== undefined) {
+		if (status.urgency === 'overdue') {
+			parts.push(
+				`Просрочено на ${Math.abs(status.remainingKm).toLocaleString('ru-RU')} км`,
+			)
+		} else {
+			parts.push(`Через ${status.remainingKm.toLocaleString('ru-RU')} км`)
+		}
+	}
+	if (status.remainingDays !== undefined) {
+		if (status.urgency === 'overdue') {
+			parts.push(`просрочено на ${Math.abs(status.remainingDays)} дн.`)
+		} else {
+			parts.push(`через ${status.remainingDays} дн.`)
+		}
+	}
+	return parts.join(' · ') || 'По графику'
 }
 
 function badgeColor(urgency: MaintenanceUrgency) {

@@ -31,6 +31,7 @@ import {
 	rescheduleAllMaintenanceReminders,
 	type NotificationPermissionStatus,
 } from '@/notifications/reminders-service'
+import { getAnalyticsService } from '@/services/analytics'
 import {
 	shareLocalFile,
 	sharePlainText,
@@ -85,6 +86,8 @@ export function SettingsScreen() {
 			})
 			if (shared.status === 'failed') {
 				Alert.alert('Ошибка', 'Не удалось создать файл. Попробуйте ещё раз.')
+			} else if (shared.status === 'shared') {
+				getAnalyticsService().track('backup_created')
 			}
 		} catch {
 			Alert.alert('Ошибка', 'Не удалось создать файл. Попробуйте ещё раз.')
@@ -131,9 +134,11 @@ export function SettingsScreen() {
 			confirmRestore(preview, () => {
 				void (async () => {
 					setBusy('Восстановление данных…')
+					getAnalyticsService().track('backup_restore_started')
 					try {
 						const result = await restoreBackupReplaceAll(migrated.backup)
 						if (!result.ok) {
+							getAnalyticsService().track('backup_restore_failed')
 							Alert.alert(
 								'Ошибка',
 								'Восстановление отменено. Ваши данные не изменены.',
@@ -144,8 +149,10 @@ export function SettingsScreen() {
 						await rescheduleAllMaintenanceReminders(
 							migrated.backup.maintenance,
 						)
+						getAnalyticsService().track('backup_restore_success')
 						Alert.alert('Готово', 'Данные восстановлены из резервной копии.')
 					} catch {
+						getAnalyticsService().track('backup_restore_failed')
 						Alert.alert(
 							'Ошибка',
 							'Восстановление отменено. Ваши данные не изменены.',
@@ -223,6 +230,8 @@ export function SettingsScreen() {
 			})
 			if (shared.status === 'failed') {
 				Alert.alert('Ошибка', 'Не удалось создать файл. Попробуйте ещё раз.')
+			} else if (shared.status === 'shared') {
+				getAnalyticsService().track('csv_exported', { kind: 'fuel' })
 			}
 		} catch {
 			Alert.alert('Ошибка', 'Не удалось создать файл. Попробуйте ещё раз.')
@@ -259,6 +268,8 @@ export function SettingsScreen() {
 			})
 			if (shared.status === 'failed') {
 				Alert.alert('Ошибка', 'Не удалось создать файл. Попробуйте ещё раз.')
+			} else if (shared.status === 'shared') {
+				getAnalyticsService().track('csv_exported', { kind: 'expenses' })
 			}
 		} catch {
 			Alert.alert('Ошибка', 'Не удалось создать файл. Попробуйте ещё раз.')
@@ -285,6 +296,8 @@ export function SettingsScreen() {
 			const shared = await sharePlainText(text)
 			if (shared.status === 'failed') {
 				Alert.alert('Ошибка', 'Не удалось открыть общий доступ.')
+			} else if (shared.status === 'shared') {
+				getAnalyticsService().track('report_shared')
 			}
 		} catch {
 			Alert.alert('Ошибка', 'Не удалось открыть общий доступ.')
@@ -310,6 +323,13 @@ export function SettingsScreen() {
 				<SecondaryButton
 					label="Добавить автомобиль"
 					onPress={() => router.push('/vehicles/edit')}
+					disabled={Boolean(busy)}
+				/>
+
+				<Text style={styles.section}>Инструменты</Text>
+				<SecondaryButton
+					label="Калькулятор поездки"
+					onPress={() => router.push('/trip')}
 					disabled={Boolean(busy)}
 				/>
 

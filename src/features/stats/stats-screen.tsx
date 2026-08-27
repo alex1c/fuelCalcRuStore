@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import type { ReactNode } from 'react'
 import { ScrollView, StyleSheet, Text, View } from 'react-native'
 import {
@@ -9,16 +9,26 @@ import {
 } from '@/domain/expenses'
 import { calculateConsumption } from '@/domain/fuel'
 import { mlToLiters } from '@/domain/shared/volume'
+import { getAdService } from '@/services/ads'
+import { JournalBanner } from '@/services/ads/journal-banner'
+import { getAnalyticsService } from '@/services/analytics'
 import { useJournal } from '@/state/journal-context'
 import { colors, spacing } from '@/theme/tokens'
 import { Screen } from '@/ui/components'
 import { formatConsumption, formatMoneyKopecks } from '@/ui/format'
 import { expenseCategoryLabel } from '@/ui/labels'
 
-/** Lightweight statistics — numbers first, optional simple bars. */
+/** Lightweight statistics — numbers first, optional simple bars + rare interstitial. */
 export function StatsScreen() {
 	const { activeVehicle, activeFuelEntries, activeExpenses } = useJournal()
 	const now = new Date()
+
+	useEffect(() => {
+		getAnalyticsService().track('statistics_opened')
+		getAnalyticsService().screen('statistics')
+		// Secondary feature only — never from save flows. Policy may skip.
+		void getAdService().showInterstitial('stats_open')
+	}, [])
 
 	const consumption = useMemo(() => {
 		if (!activeVehicle) {
@@ -120,6 +130,7 @@ export function StatsScreen() {
 			<ScrollView contentContainerStyle={{ paddingBottom: spacing.xl }}>
 				<Text style={styles.title}>Статистика</Text>
 
+				{/* Primary summary metrics first — banner sits after them. */}
 				<Section title="Топливо">
 					<Line
 						label="Средний расход"
@@ -139,15 +150,6 @@ export function StatsScreen() {
 							lifetime ? formatMoneyKopecks(lifetime.fuelKopecks) : '—'
 						}
 					/>
-					{consumptionBars.length > 0 ? (
-						<>
-							<Text style={styles.chartTitle}>Расход по интервалам</Text>
-							<SimpleBars
-								data={consumptionBars}
-								formatValue={(v) => v.toFixed(1)}
-							/>
-						</>
-					) : null}
 				</Section>
 
 				<Section title="Расходы">
@@ -174,11 +176,6 @@ export function StatsScreen() {
 									/>
 								))
 						: null}
-					<Text style={styles.chartTitle}>Расходы по месяцам</Text>
-					<SimpleBars
-						data={monthlyBars}
-						formatValue={(v) => formatMoneyKopecks(v)}
-					/>
 				</Section>
 
 				<Section title="Владение">
@@ -197,6 +194,38 @@ export function StatsScreen() {
 								Math.round(thisYear.totalKopecks / (now.getMonth() + 1)),
 							)}
 						/>
+					) : null}
+				</Section>
+
+				{/* Banner after headline metrics, before secondary charts. */}
+				{activeVehicle ? (
+					<JournalBanner
+						visible
+						placement="stats_banner"
+						remountKey={activeVehicle.id}
+					/>
+				) : null}
+
+				<Section title="Динамика">
+					{monthlyBars.some((b) => b.value > 0) ? (
+						<>
+							<Text style={styles.chartTitle}>Расходы по месяцам</Text>
+							<SimpleBars
+								data={monthlyBars}
+								formatValue={(v) => formatMoneyKopecks(v)}
+							/>
+						</>
+					) : (
+						<Text style={styles.muted}>Пока нет расходов для графика</Text>
+					)}
+					{consumptionBars.length > 0 ? (
+						<>
+							<Text style={styles.chartTitle}>Динамика расхода</Text>
+							<SimpleBars
+								data={consumptionBars}
+								formatValue={(v) => v.toFixed(1)}
+							/>
+						</>
 					) : null}
 				</Section>
 			</ScrollView>

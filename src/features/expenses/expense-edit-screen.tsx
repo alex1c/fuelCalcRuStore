@@ -14,6 +14,7 @@ import {
 	getExpenseById,
 	upsertExpense,
 } from '@/persistence'
+import { getAnalyticsService } from '@/services/analytics'
 import { useJournal } from '@/state/journal-context'
 import { colors, spacing } from '@/theme/tokens'
 import {
@@ -129,6 +130,9 @@ export function ExpenseEditScreen() {
 		setSaving(true)
 		try {
 			await upsertExpense(validated.value)
+			if (!editingId) {
+				getAnalyticsService().track('expense_created', { category })
+			}
 			await refresh()
 			router.back()
 		} catch (err) {

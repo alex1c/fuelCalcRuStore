@@ -3,10 +3,10 @@ import type { ConfigContext, ExpoConfig } from 'expo/config'
 /**
  * Expo app config — Continuous Native Generation entry.
  *
- * Production / RuStore (later phases):
+ * Production / RuStore:
  *   APP_VARIANT=production
  *
- * Phase 0–1: no ads, analytics, or extra permissions.
+ * Analytics / ads keys: EXPO_PUBLIC_* via `.env` (see `.env.example`).
  */
 export default ({ config }: ConfigContext): ExpoConfig => {
 	const isProduction = process.env.APP_VARIANT === 'production'
@@ -32,7 +32,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 		...config,
 		name: 'Автожурнал',
 		slug: 'auto-journal',
-		version: '0.1.0',
+		version: '1.0.0',
 		orientation: 'portrait',
 		icon: './assets/icon.png',
 		userInterfaceStyle: 'light',

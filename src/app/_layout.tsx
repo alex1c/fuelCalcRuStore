@@ -1,10 +1,16 @@
 import { Stack } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
+import { useEffect } from 'react'
+import { initializeAppServices } from '@/services'
 import { JournalProvider } from '@/state/journal-context'
 import { colors } from '@/theme/tokens'
 
 /** Root stack: tabs + modal-like edit screens. */
 export default function RootLayout() {
+	useEffect(() => {
+		initializeAppServices()
+	}, [])
+
 	return (
 		<JournalProvider>
 			<StatusBar style="dark" />
@@ -35,6 +41,10 @@ export default function RootLayout() {
 				<Stack.Screen
 					name="maintenance/edit"
 					options={{ title: 'ТО' }}
+				/>
+				<Stack.Screen
+					name="trip"
+					options={{ title: 'Калькулятор поездки' }}
 				/>
 			</Stack>
 		</JournalProvider>

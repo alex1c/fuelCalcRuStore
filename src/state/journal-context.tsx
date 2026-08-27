@@ -19,6 +19,7 @@ import {
 	listVehicles,
 	setActiveVehicleId,
 } from '@/persistence'
+import { getAnalyticsService } from '@/services/analytics'
 
 interface JournalContextValue {
 	isReady: boolean
@@ -95,6 +96,7 @@ export function JournalProvider({ children }: { children: ReactNode }) {
 	const selectVehicle = useCallback(async (vehicleId: string) => {
 		await setActiveVehicleId(vehicleId)
 		setActiveId(vehicleId)
+		getAnalyticsService().track('vehicle_switched')
 	}, [])
 
 	const activeVehicle = useMemo(

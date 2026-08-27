@@ -17,6 +17,7 @@ import {
 	ensureNotificationPermission,
 	syncMaintenanceReminders,
 } from '@/notifications/reminders-service'
+import { getAnalyticsService } from '@/services/analytics'
 import { useJournal } from '@/state/journal-context'
 import { colors, spacing } from '@/theme/tokens'
 import {
@@ -185,6 +186,12 @@ export function MaintenanceEditScreen() {
 		try {
 			await upsertMaintenance(item)
 			await syncMaintenanceReminders(item)
+			if (!editingId) {
+				getAnalyticsService().track('maintenance_created')
+			}
+			if (item.remind) {
+				getAnalyticsService().track('maintenance_reminder_enabled')
+			}
 			await refresh()
 			router.back()
 		} catch (err) {
@@ -217,6 +224,7 @@ export function MaintenanceEditScreen() {
 		})
 		await upsertMaintenance(completed)
 		await syncMaintenanceReminders(completed)
+		getAnalyticsService().track('maintenance_completed')
 		await refresh()
 		router.back()
 	}

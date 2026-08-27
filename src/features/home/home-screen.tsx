@@ -16,13 +16,14 @@ import {
 } from '@/domain/expenses'
 import { calculateConsumption } from '@/domain/fuel'
 import { getMaintenanceDueStatus } from '@/domain/maintenance'
+import { JournalBanner } from '@/services/ads/journal-banner'
 import { useJournal } from '@/state/journal-context'
 import { colors, spacing } from '@/theme/tokens'
 import { PrimaryButton, Screen, SecondaryButton } from '@/ui/components'
 import { formatConsumption, formatMoneyKopecks } from '@/ui/format'
 import { expenseCategoryLabel } from '@/ui/labels'
 
-/** Home dashboard with ownership + fuel + maintenance snapshot. */
+/** Home dashboard — hero consumption, then cost/TO, then quick actions, then banner. */
 export function HomeScreen() {
 	const router = useRouter()
 	const {
@@ -132,7 +133,7 @@ export function HomeScreen() {
 		return (
 			<Screen>
 				<ScrollView>
-					<Text style={styles.title}>Автожурнал</Text>
+					<Text style={styles.brand}>Автожурнал</Text>
 					<Text style={styles.subtitle}>
 						Добавьте автомобиль, чтобы вести заправки и расходы.
 					</Text>
@@ -155,64 +156,67 @@ export function HomeScreen() {
 			? consumption.intervals[consumption.intervals.length - 1]
 			: null
 
+	const costPerKmText =
+		costPerKm?.status === 'ok' && costPerKm.costPerKmMajor !== undefined
+			? `${costPerKm.costPerKmMajor.toFixed(2).replace('.', ',')} ₽/км`
+			: null
+
+	const monthSpendText = monthCosts
+		? `${formatMoneyKopecks(monthCosts.totalKopecks)} в ${monthName(now)}`
+		: null
+
+	const toText = formatNearestMaintenance(nearestMaintenance)
+
 	return (
 		<Screen>
 			<ScrollView contentContainerStyle={{ paddingBottom: spacing.xl }}>
 				<Pressable onPress={() => router.push('/vehicles')}>
 					<Text style={styles.vehicleLabel}>Автомобиль</Text>
-					<Text style={styles.title}>{activeVehicle.displayName}</Text>
+					<Text style={styles.vehicleName}>{activeVehicle.displayName}</Text>
 				</Pressable>
 
-				<View style={styles.metrics}>
-					<Metric
-						label="Средний расход"
-						value={averageText ?? 'недоступен'}
-						onPress={
-							lastInterval
-								? () =>
-										Alert.alert(
-											'Расход',
-											lastInterval.explanation.formula +
-												(consumption?.status === 'ok'
-													? `\n\nСредний: ${formatConsumption(consumption.averageLitersPer100Km)}`
-													: ''),
-										)
-								: undefined
-						}
-					/>
-					<Metric
-						label="₽/км"
-						value={
-							costPerKm?.status === 'ok' && costPerKm.costPerKmMajor !== undefined
-								? `${costPerKm.costPerKmMajor.toFixed(2)} ₽/км`
-								: 'пока недоступна'
-						}
-					/>
-					<Metric
-						label={`Расходы · ${monthName(now)}`}
-						value={
-							monthCosts
-								? formatMoneyKopecks(monthCosts.totalKopecks)
-								: '—'
-						}
-					/>
-					<Metric
-						label="До ближайшего ТО"
-						value={
-							nearestMaintenance?.status.remainingKm !== undefined
-								? `${nearestMaintenance.status.remainingKm.toLocaleString('ru-RU')} км`
-								: nearestMaintenance?.status.remainingDays !== undefined
-									? `${nearestMaintenance.status.remainingDays} дн.`
-									: 'нет данных'
-						}
-					/>
-				</View>
+				<Pressable
+					onPress={
+						lastInterval
+							? () =>
+									Alert.alert(
+										'Расход',
+										lastInterval.explanation.formula +
+											(consumption?.status === 'ok'
+												? `\n\nСредний: ${formatConsumption(consumption.averageLitersPer100Km)}`
+												: ''),
+									)
+							: undefined
+					}
+					style={styles.hero}
+				>
+					<Text style={styles.heroValue}>
+						{averageText ?? '—'}
+					</Text>
+					<Text style={styles.heroLabel}>Средний расход</Text>
+				</Pressable>
 
 				{consumption?.status === 'insufficient_data' ? (
 					<Text style={styles.hint}>
 						{describeFuelEmpty(consumption.reason)}
 					</Text>
 				) : null}
+
+				<View style={styles.secondaryRow}>
+					{costPerKmText ? (
+						<Text style={styles.secondaryMetric}>{costPerKmText}</Text>
+					) : (
+						<Text style={styles.secondaryMuted}>₽/км пока недоступна</Text>
+					)}
+					{monthSpendText ? (
+						<Text style={styles.secondaryMetric}>{monthSpendText}</Text>
+					) : null}
+					{toText ? (
+						<Text style={styles.secondaryMetric}>{toText}</Text>
+					) : (
+						<Text style={styles.secondaryMuted}>ТО не запланировано</Text>
+					)}
+				</View>
 
 				<View style={styles.actions}>
 					<PrimaryButton
@@ -229,6 +233,13 @@ export function HomeScreen() {
 						onPress={() => router.push('/maintenance/edit')}
 					/>
 				</View>
+
+				{/* Banner below useful content and CTAs — never between metric and +Заправка. */}
+				<JournalBanner
+					visible
+					placement="home_banner"
+					remountKey={activeVehicle.id}
+				/>
 
 				<Text style={styles.section}>Последние записи</Text>
 				{recent.length === 0 ? (
@@ -269,7 +280,8 @@ export function HomeScreen() {
 								</Text>
 							))}
 						<Text style={styles.muted}>
-							Год: {formatMoneyKopecks(
+							Год:{' '}
+							{formatMoneyKopecks(
 								aggregateCosts(
 									activeFuelEntries,
 									activeExpenses,
@@ -285,25 +297,38 @@ export function HomeScreen() {
 	)
 }
 
-function Metric({
-	label,
-	value,
-	onPress,
-}: {
-	label: string
-	value: string
-	onPress?: () => void
-}) {
-	const content = (
-		<View style={styles.metricCard}>
-			<Text style={styles.metricValue}>{value}</Text>
-			<Text style={styles.metricLabel}>{label}</Text>
-		</View>
-	)
-	if (onPress) {
-		return <Pressable onPress={onPress}>{content}</Pressable>
+function formatNearestMaintenance(
+	nearest: {
+		item: { title: string }
+		status: {
+			urgency: string
+			remainingKm?: number
+			remainingDays?: number
+		}
+	} | null,
+): string | null {
+	if (!nearest) {
+		return null
 	}
-	return content
+	const title = nearest.item.title
+	const { urgency, remainingKm, remainingDays } = nearest.status
+
+	if (urgency === 'overdue') {
+		if (remainingKm !== undefined) {
+			return `${title}: просрочено на ${Math.abs(remainingKm).toLocaleString('ru-RU')} км`
+		}
+		if (remainingDays !== undefined) {
+			return `${title}: просрочено на ${Math.abs(remainingDays)} дн.`
+		}
+	}
+
+	if (remainingKm !== undefined) {
+		return `${title}: через ${remainingKm.toLocaleString('ru-RU')} км`
+	}
+	if (remainingDays !== undefined) {
+		return `${title}: через ${remainingDays} дн.`
+	}
+	return title
 }
 
 function describeFuelEmpty(reason: string): string {
@@ -313,7 +338,7 @@ function describeFuelEmpty(reason: string): string {
 		case 'only_baseline_full_tank':
 			return 'Начальная точка сохранена. Расход появится после следующей полной заправки.'
 		case 'no_full_tank':
-			return 'Отметьте полную заправку, чтобы рассчитать расход'
+			return 'Отметьте «Полный бак», чтобы рассчитать расход'
 		default:
 			return 'Недостаточно данных для расхода'
 	}
@@ -324,8 +349,8 @@ function monthName(date: Date): string {
 }
 
 const styles = StyleSheet.create({
-	title: {
-		fontSize: 26,
+	brand: {
+		fontSize: 28,
 		fontWeight: '700',
 		color: colors.textPrimary,
 		marginBottom: spacing.md,
@@ -334,39 +359,52 @@ const styles = StyleSheet.create({
 		fontSize: 12,
 		color: colors.textMuted,
 	},
+	vehicleName: {
+		fontSize: 22,
+		fontWeight: '700',
+		color: colors.textPrimary,
+		marginBottom: spacing.md,
+	},
 	subtitle: {
 		fontSize: 15,
 		color: colors.textSecondary,
 		marginBottom: spacing.lg,
 	},
-	metrics: {
-		gap: spacing.sm,
-		marginBottom: spacing.md,
+	hero: {
+		marginBottom: spacing.sm,
 	},
-	metricCard: {
-		backgroundColor: colors.surface,
-		borderRadius: 12,
-		padding: spacing.md,
-		borderWidth: 1,
-		borderColor: colors.border,
+	heroValue: {
+		fontSize: 36,
+		fontWeight: '800',
+		color: colors.textPrimary,
+		letterSpacing: -0.5,
 	},
-	metricValue: {
-		fontSize: 22,
-		fontWeight: '700',
+	heroLabel: {
+		fontSize: 14,
+		color: colors.textSecondary,
+		marginTop: 2,
+	},
+	secondaryRow: {
+		gap: 6,
+		marginBottom: spacing.lg,
+	},
+	secondaryMetric: {
+		fontSize: 16,
+		fontWeight: '600',
 		color: colors.textPrimary,
 	},
-	metricLabel: {
-		marginTop: 2,
-		fontSize: 13,
-		color: colors.textSecondary,
+	secondaryMuted: {
+		fontSize: 14,
+		color: colors.textMuted,
 	},
 	actions: {
-		marginBottom: spacing.lg,
+		marginBottom: spacing.md,
 	},
 	section: {
 		fontSize: 15,
 		fontWeight: '700',
 		color: colors.textPrimary,
+		marginTop: spacing.lg,
 		marginBottom: spacing.sm,
 	},
 	recentRow: {
@@ -379,7 +417,7 @@ const styles = StyleSheet.create({
 		color: colors.textPrimary,
 	},
 	breakdown: {
-		marginTop: spacing.lg,
+		marginTop: spacing.md,
 	},
 	breakdownLine: {
 		fontSize: 14,

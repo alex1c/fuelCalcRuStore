@@ -63,3 +63,7 @@ coverage/
 # local smoke / agent temp artifacts (never commit)
 .tmp*
 .tmp-*/
+
+__pycache__/
+*.pyc
+

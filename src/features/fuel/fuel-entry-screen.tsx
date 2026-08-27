@@ -25,6 +25,7 @@ import {
 	upsertFuelEntry,
 	upsertVehicle,
 } from '@/persistence'
+import { getAnalyticsService } from '@/services/analytics'
 import { useJournal } from '@/state/journal-context'
 import { colors, spacing } from '@/theme/tokens'
 import { Chip, Field, PrimaryButton, Screen, SecondaryButton } from '@/ui/components'
@@ -241,6 +242,15 @@ export function FuelEntryScreen() {
 				})
 			}
 
+			const tank = fullTank ? 'full' : 'partial'
+			const money_mode =
+				mode === 'liters_and_price' ? 'liters_price' : 'liters_total'
+			if (editingId) {
+				getAnalyticsService().track('fuel_entry_edited', { tank, money_mode })
+			} else {
+				getAnalyticsService().track('fuel_entry_created', { tank, money_mode })
+			}
+
 			await refresh()
 			router.back()
 		} catch (err) {
@@ -262,6 +272,7 @@ export function FuelEntryScreen() {
 				onPress: () => {
 					void (async () => {
 						await deleteFuelEntry(editingId)
+						getAnalyticsService().track('fuel_entry_deleted')
 						await refresh()
 						router.back()
 					})()
@@ -282,13 +293,6 @@ export function FuelEntryScreen() {
 				<Text style={styles.vehicle}>{activeVehicle.displayName}</Text>
 
 				<Field
-					label="Дата и время (ГГГГ-ММ-ДД ЧЧ:ММ)"
-					value={recordedAtLocal}
-					onChangeText={setRecordedAtLocal}
-					placeholder="2026-08-26 14:30"
-					error={fieldErrors.recordedAt}
-				/>
-				<Field
 					label="Пробег, км *"
 					value={odometer}
 					onChangeText={setOdometer}
@@ -304,15 +308,15 @@ export function FuelEntryScreen() {
 					error={fieldErrors.liters}
 				/>
 
-				<Text style={styles.label}>Расчёт стоимости</Text>
+				<Text style={styles.label}>Стоимость</Text>
 				<View style={styles.chips}>
 					<Chip
-						label="Литры + цена/л"
+						label="Цена за литр"
 						selected={mode === 'liters_and_price'}
 						onPress={() => setMode('liters_and_price')}
 					/>
 					<Chip
-						label="Литры + сумма"
+						label="Сумма"
 						selected={mode === 'liters_and_total'}
 						onPress={() => setMode('liters_and_total')}
 					/>
@@ -349,7 +353,14 @@ export function FuelEntryScreen() {
 				) : null}
 
 				<View style={styles.switchRow}>
-					<Text style={styles.switchLabel}>Полный бак</Text>
+					<View style={{ flex: 1, paddingRight: spacing.md }}>
+						<Text style={styles.switchLabel}>Полный бак</Text>
+						<Text style={styles.switchHint}>
+							{fullTank
+								? 'Полная заправка — для расчёта расхода'
+								: 'Частичная заправка — расход не обновляется'}
+						</Text>
+					</View>
 					<Switch
 						value={fullTank}
 						onValueChange={setFullTank}
@@ -357,6 +368,13 @@ export function FuelEntryScreen() {
 					/>
 				</View>
 
+				<Field
+					label="Дата и время (ГГГГ-ММ-ДД ЧЧ:ММ)"
+					value={recordedAtLocal}
+					onChangeText={setRecordedAtLocal}
+					placeholder="2026-08-26 14:30"
+					error={fieldErrors.recordedAt}
+				/>
 				<Field
 					label="Заметка"
 					value={note}
@@ -449,6 +467,11 @@ const styles = StyleSheet.create({
 	switchLabel: {
 		fontSize: 16,
 		color: colors.textPrimary,
+	},
+	switchHint: {
+		marginTop: 2,
+		fontSize: 12,
+		color: colors.textMuted,
 	},
 	muted: {
 		color: colors.textMuted,

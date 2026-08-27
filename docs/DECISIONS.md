@@ -130,3 +130,20 @@ Decision: JSON backup = full restore format (`format: auto-journal-backup`, vers
 Status: Accepted
 
 Decision: Trip calculator returns separate fields: `estimatedFuelCost` and optional `estimatedOwnershipCost`. UI must not merge them into one unlabeled number.
+
+---
+
+## 2026-08-27 — Ads and AppMetrica (Phase 5)
+
+Status: Accepted
+
+Context: Regular journal use must stay clean; sibling RuStore apps already ship Yandex + AppMetrica adapters.
+
+Decision:
+
+1. Service interfaces (`AdService`, `AnalyticsService`) with Safe wrappers; SDK failures never block journal saves.
+2. Privacy-safe event taxonomy only (actions / categories / modes — never notes, names, odometer, amounts, paths).
+3. Banners: Home (below CTAs) + Statistics (after summary metrics). No History list injection.
+4. Interstitial only from Statistics; centralized policy = min 3 sessions + 24h cooldown; protected flows never request ads.
+5. Demo Yandex units in `__DEV__`; production unit IDs / AppMetrica key via `.env` (empty → ads off / Dev analytics).
+6. Production signing keystore is per-app and outside git; until created: `BLOCKED ON PRODUCTION SIGNING`.

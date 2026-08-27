@@ -41,7 +41,7 @@ export function HistoryScreen() {
 			id: entry.id,
 			at: entry.recordedAt,
 			title: `Заправка · ${formatOdometer(entry.odometerKm)}`,
-			subtitle: `${formatLiters(entry.litersMl)} л · ${formatMoneyKopecks(entry.totalCostKopecks)}${entry.fullTank ? ' · полный бак' : ''}`,
+			subtitle: `${formatLiters(entry.litersMl)} л · ${formatMoneyKopecks(entry.totalCostKopecks)}${entry.fullTank ? ' · полный бак' : ' · частичная'}`,
 		}))
 		const expenseItems: TimelineItem[] = activeExpenses.map((expense) => ({
 			kind: 'expense' as const,
