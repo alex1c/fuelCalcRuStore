@@ -42,12 +42,15 @@
 - Release identity 1.0.0 / versionCode 1
 - Production signing / AAB: blocked until autojournal keystore exists
 
-## Phase 6 — RuStore submission
+## Phase 6 — RuStore submission (in progress)
 
-- Listing assets, privacy policy
-- Production AppMetrica key + ad unit IDs
-- Release signing / AAB verification
-- Google Play readiness pass (later)
+- [x] Release scripts + checklist (`docs/RUSTORE_RELEASE.md`)
+- [x] Privacy policy draft + HTML (`docs/PRIVACY_POLICY_*.md`, `docs/privacy.html`)
+- [x] Store listing copy draft (`docs/STORE_LISTING_RU.md`)
+- [ ] Production AppMetrica key + ad unit IDs in `.env`
+- [ ] Production keystore + signed AAB verification
+- [ ] RuStore screenshots + live privacy URL
+- [ ] Google Play readiness pass (later)
 
 ## Explicit non-goals until justified
 
