@@ -13,9 +13,10 @@ Mobile Ads are integrated (banners on Home and Statistics; occasional
 interstitial on Statistics open subject to frequency policy).
 
 We do **not** claim that “no data is collected” — analytics and ads SDKs process
-technical events and identifiers under Yandex policies.
+technical events, Advertising ID, and telemetry under Yandex policies.
 
-Publish `docs/privacy.html` at a public HTTPS URL before RuStore moderation.
+Public URL: https://alex1c.github.io/fuelCalcRuStore/privacy.html  
+(requires GitHub Pages enabled on the repository)
 
 ## Data processed
 
@@ -29,9 +30,10 @@ Publish `docs/privacy.html` at a public HTTPS URL before RuStore moderation.
 
 - categorical analytics events (in-app actions without personal fields: no notes,
   vehicle names, odometer readings, amounts, or file paths in event params);
-- ad identifiers and SDK telemetry per Yandex policies.
+- Advertising ID and SDK telemetry per Yandex policies.
 
-No account is required. No cloud sync.
+No account is required. No cloud sync. **No** GPS/location, camera, or
+microphone access.
 
 ## Purposes
 
@@ -52,10 +54,8 @@ where to save or send files through Android system dialogs.
 - **Notifications** — maintenance reminders only (can be disabled).
 - **File access** — system Document Picker for restore only; no broad storage
   access is requested.
+- **Internet** — for analytics and ads SDKs.
 
 ## Contact
 
-Privacy inquiries — operator contact (email or form to be added before store URL).
-
-Full legal text may be expanded from the ForestMusic Foundation template before
-RuStore publication.
+Privacy inquiries: **alex1c-spb@yandex.ru**

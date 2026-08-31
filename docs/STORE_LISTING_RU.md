@@ -65,8 +65,11 @@ Format: portrait 1080×1920 (9:16), RuStore phone screenshots.
 
 ## Privacy policy URL
 
-Publish `docs/privacy.html` at HTTPS before submission. Placeholder until hosted.
+Expected (GitHub Pages, `/docs` source):  
+https://alex1c.github.io/fuelCalcRuStore/privacy.html
+
+Status: requires GitHub Pages enablement in repo settings.
 
 ## Support contact
 
-Add email or web form before store submission.
+alex1c-spb@yandex.ru
