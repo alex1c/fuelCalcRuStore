@@ -51,14 +51,13 @@ export function JournalProvider({ children }: { children: ReactNode }) {
 
 	const refresh = useCallback(async () => {
 		try {
-			const [nextVehicles, nextFuel, nextExpenses, nextMaintenance, storedActiveId] =
-				await Promise.all([
-					listVehicles(),
-					listFuelEntries(),
-					listExpenses(),
-					listMaintenance(),
-					getActiveVehicleId(),
-				])
+			// Sequential loads: each repository call is already queued, but avoiding
+			// Promise.all keeps the refresh path easy to reason about on Android.
+			const nextVehicles = await listVehicles()
+			const nextFuel = await listFuelEntries()
+			const nextExpenses = await listExpenses()
+			const nextMaintenance = await listMaintenance()
+			const storedActiveId = await getActiveVehicleId()
 
 			let nextActive = storedActiveId
 			if (nextActive && !nextVehicles.some((v) => v.id === nextActive)) {
@@ -83,8 +82,9 @@ export function JournalProvider({ children }: { children: ReactNode }) {
 					rescheduleAllMaintenanceReminders(nextMaintenance),
 			)
 		} catch (err) {
-			const message = err instanceof Error ? err.message : 'Database error'
-			setError(message)
+			// Never surface raw native SQLite / SharedObject exceptions to users.
+			console.warn('[journal] database refresh failed', err)
+			setError('Не удалось загрузить данные. Перезапустите приложение.')
 			setIsReady(true)
 		}
 	}, [])

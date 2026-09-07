@@ -2,7 +2,7 @@
   "expo": {
     "name": "Автожурнал",
     "slug": "auto-journal",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/autojournal-icon.png",
     "userInterfaceStyle": "light",
@@ -16,7 +16,7 @@
     },
     "android": {
       "package": "com.calculatorplatform.autojournal",
-      "versionCode": 1,
+      "versionCode": 2,
       "adaptiveIcon": {
         "backgroundColor": "#0B4FA3",
         "foregroundImage": "./assets/autojournal-adaptive-foreground.png"

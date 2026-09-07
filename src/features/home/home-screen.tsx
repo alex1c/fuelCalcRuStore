@@ -136,7 +136,7 @@ export function HomeScreen() {
 	if (error) {
 		return (
 			<Screen>
-				<Text style={styles.error}>Ошибка БД: {error}</Text>
+				<Text style={styles.error}>{error}</Text>
 			</Screen>
 		)
 	}

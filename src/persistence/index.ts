@@ -15,7 +15,12 @@ export {
 	type SchemaMigration,
 	type SqlExecutor,
 } from './migrations'
-export { getDatabase, resetDatabaseSingleton } from './database'
+export {
+	enqueueDbOperation,
+	getDatabase,
+	resetDatabaseSingleton,
+	withDatabase,
+} from './database'
 export {
 	deleteVehicle,
 	getVehicleById,

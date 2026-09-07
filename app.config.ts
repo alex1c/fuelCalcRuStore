@@ -34,7 +34,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 		...config,
 		name: 'Автожурнал',
 		slug: 'auto-journal',
-		version: '1.0.0',
+		version: '1.0.1',
 		orientation: 'portrait',
 		icon: './assets/autojournal-icon.png',
 		userInterfaceStyle: 'light',
@@ -48,7 +48,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 		},
 		android: {
 			package: 'com.calculatorplatform.autojournal',
-			versionCode: 1,
+			versionCode: 2,
 			adaptiveIcon: {
 				backgroundColor: '#0B4FA3',
 				foregroundImage: './assets/autojournal-adaptive-foreground.png',

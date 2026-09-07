@@ -28,46 +28,54 @@ export async function restoreBackupReplaceAll(
 	backup: AutoJournalBackupV1,
 	db?: RestoreDatabase,
 ): Promise<RestoreResult> {
-	// Lazy-load SQLite only for production path so unit tests stay node-pure.
-	const database: RestoreDatabase =
-		db ??
-		((await (await import('@/persistence/database')).getDatabase()) as unknown as RestoreDatabase)
+	const run = async (database: RestoreDatabase): Promise<RestoreResult> => {
+		try {
+			await database.withTransactionAsync(async () => {
+				await database.execAsync('DELETE FROM fuel_entries;')
+				await database.execAsync('DELETE FROM expenses;')
+				await database.execAsync('DELETE FROM maintenance_items;')
+				await database.execAsync('DELETE FROM settings;')
+				await database.execAsync('DELETE FROM vehicles;')
 
-	try {
-		await database.withTransactionAsync(async () => {
-			await database.execAsync('DELETE FROM fuel_entries;')
-			await database.execAsync('DELETE FROM expenses;')
-			await database.execAsync('DELETE FROM maintenance_items;')
-			await database.execAsync('DELETE FROM settings;')
-			await database.execAsync('DELETE FROM vehicles;')
+				for (const vehicle of backup.vehicles) {
+					await insertVehicle(database, vehicle)
+				}
+				for (const entry of backup.fuelEntries) {
+					await insertFuel(database, entry)
+				}
+				for (const expense of backup.expenses) {
+					await insertExpense(database, expense)
+				}
+				for (const item of backup.maintenance) {
+					await insertMaintenance(database, item)
+				}
 
-			for (const vehicle of backup.vehicles) {
-				await insertVehicle(database, vehicle)
+				if (backup.settings.activeVehicleId) {
+					await database.runAsync(
+						`INSERT INTO settings (key, value) VALUES (?, ?);`,
+						['activeVehicleId', backup.settings.activeVehicleId],
+					)
+				}
+			})
+			return { ok: true }
+		} catch (err) {
+			return {
+				ok: false,
+				message: err instanceof Error ? err.message : 'restore_failed',
 			}
-			for (const entry of backup.fuelEntries) {
-				await insertFuel(database, entry)
-			}
-			for (const expense of backup.expenses) {
-				await insertExpense(database, expense)
-			}
-			for (const item of backup.maintenance) {
-				await insertMaintenance(database, item)
-			}
-
-			if (backup.settings.activeVehicleId) {
-				await database.runAsync(
-					`INSERT INTO settings (key, value) VALUES (?, ?);`,
-					['activeVehicleId', backup.settings.activeVehicleId],
-				)
-			}
-		})
-		return { ok: true }
-	} catch (err) {
-		return {
-			ok: false,
-			message: err instanceof Error ? err.message : 'restore_failed',
 		}
 	}
+
+	// Injected DB (unit tests) bypasses the native serial queue.
+	if (db) {
+		return run(db)
+	}
+
+	// Production path: hold the SQLite queue for the whole REPLACE ALL transaction.
+	const { withDatabase } = await import('@/persistence/database')
+	return withDatabase((nativeDb) =>
+		run(nativeDb as unknown as RestoreDatabase),
+	)
 }
 
 async function insertVehicle(
