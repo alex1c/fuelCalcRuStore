@@ -10,7 +10,6 @@ import {
 import { calculateConsumption } from '@/domain/fuel'
 import { mlToLiters } from '@/domain/shared/volume'
 import { getAdService } from '@/services/ads'
-import { JournalBanner } from '@/services/ads/journal-banner'
 import { getAnalyticsService } from '@/services/analytics'
 import { useJournal } from '@/state/journal-context'
 import { colors, spacing } from '@/theme/tokens'
@@ -134,7 +133,10 @@ export function StatsScreen() {
 
 	return (
 		<Screen>
-			<ScrollView contentContainerStyle={{ paddingBottom: spacing.xl }}>
+			<ScrollView
+				style={styles.scroller}
+				contentContainerStyle={{ paddingBottom: spacing.xl }}
+			>
 				<Text style={styles.title}>Статистика</Text>
 
 				{/* Primary summary metrics first — banner sits after them. */}
@@ -203,15 +205,6 @@ export function StatsScreen() {
 						/>
 					) : null}
 				</Section>
-
-				{/* Banner after headline metrics, before secondary charts. */}
-				{activeVehicle ? (
-					<JournalBanner
-						visible
-						placement="stats_banner"
-						remountKey={activeVehicle.id}
-					/>
-				) : null}
 
 				<Section title="Динамика">
 					{monthlyBars.some((b) => b.value > 0) ? (
@@ -293,6 +286,9 @@ function SimpleBars({
 }
 
 const styles = StyleSheet.create({
+	scroller: {
+		flex: 1,
+	},
 	title: {
 		fontSize: 24,
 		fontWeight: '700',

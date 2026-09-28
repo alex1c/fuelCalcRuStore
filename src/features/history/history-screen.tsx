@@ -91,6 +91,7 @@ export function HistoryScreen() {
 			</View>
 
 			<FlatList
+				style={styles.list}
 				data={items}
 				keyExtractor={(item) => `${item.kind}-${item.id}`}
 				ListEmptyComponent={
@@ -123,6 +124,9 @@ export function HistoryScreen() {
 }
 
 const styles = StyleSheet.create({
+	list: {
+		flex: 1,
+	},
 	title: {
 		fontSize: 24,
 		fontWeight: '700',

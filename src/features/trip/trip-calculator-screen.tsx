@@ -99,6 +99,7 @@ export function TripCalculatorScreen() {
 	return (
 		<Screen>
 			<ScrollView
+				style={styles.scroller}
 				keyboardShouldPersistTaps="handled"
 				contentContainerStyle={{ paddingBottom: spacing.xl }}
 			>
@@ -171,6 +172,9 @@ function formatLitersRu(value: number): string {
 }
 
 const styles = StyleSheet.create({
+	scroller: {
+		flex: 1,
+	},
 	title: {
 		fontSize: 24,
 		fontWeight: '700',

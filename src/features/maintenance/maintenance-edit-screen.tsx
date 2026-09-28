@@ -194,7 +194,8 @@ export function MaintenanceEditScreen() {
 			await refresh()
 			router.back()
 		} catch (err) {
-			Alert.alert('Ошибка', err instanceof Error ? err.message : 'Не удалось сохранить')
+			console.warn('[maintenance] save failed', err)
+			Alert.alert('Ошибка', 'Не удалось сохранить. Попробуйте ещё раз.')
 		} finally {
 			setSaving(false)
 		}
@@ -221,11 +222,16 @@ export function MaintenanceEditScreen() {
 			odometerKm: odo.valueKm,
 			nowIso: now,
 		})
-		await upsertMaintenance(completed)
-		await syncMaintenanceReminders(completed)
-		getAnalyticsService().track('maintenance_completed')
-		await refresh()
-		router.back()
+		try {
+			await upsertMaintenance(completed)
+			await syncMaintenanceReminders(completed)
+			getAnalyticsService().track('maintenance_completed')
+			await refresh()
+			router.back()
+		} catch (err) {
+			console.warn('[maintenance] complete failed', err)
+			Alert.alert('Ошибка', 'Не удалось отметить ТО. Попробуйте ещё раз.')
+		}
 	}
 
 	function handleDelete() {
@@ -239,10 +245,18 @@ export function MaintenanceEditScreen() {
 				style: 'destructive',
 				onPress: () => {
 					void (async () => {
-						await cancelMaintenanceReminders(editingId)
-						await deleteMaintenance(editingId)
-						await refresh()
-						router.back()
+						try {
+							await cancelMaintenanceReminders(editingId)
+							await deleteMaintenance(editingId)
+							await refresh()
+							router.back()
+						} catch (err) {
+							console.warn('[maintenance] delete failed', err)
+							Alert.alert(
+								'Ошибка',
+								'Не удалось удалить запись ТО. Попробуйте ещё раз.',
+							)
+						}
 					})()
 				},
 			},
@@ -252,6 +266,7 @@ export function MaintenanceEditScreen() {
 	return (
 		<Screen>
 			<ScrollView
+				style={styles.scroller}
 				keyboardShouldPersistTaps="handled"
 				contentContainerStyle={{ paddingBottom: spacing.xl }}
 			>
@@ -375,6 +390,9 @@ function fromDateInput(raw: string): string | null {
 }
 
 const styles = StyleSheet.create({
+	scroller: {
+		flex: 1,
+	},
 	title: {
 		fontSize: 24,
 		fontWeight: '700',

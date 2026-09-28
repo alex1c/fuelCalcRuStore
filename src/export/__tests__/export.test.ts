@@ -116,5 +116,9 @@ describe('share report formatter', () => {
 		expect(text).toContain('Топливо:')
 		expect(text).toContain('Прочие расходы:')
 		expect(text).toContain('Всего:')
+		expect(text).toContain('Автомобильный журнал в RuStore')
+		expect(text).toContain(
+			'https://www.rustore.ru/catalog/app/com.calculatorplatform.autojournal',
+		)
 	})
 })

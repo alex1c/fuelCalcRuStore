@@ -16,14 +16,13 @@ import {
 } from '@/domain/expenses'
 import { calculateConsumption } from '@/domain/fuel'
 import { getMaintenanceDueStatus } from '@/domain/maintenance'
-import { JournalBanner } from '@/services/ads/journal-banner'
 import { useJournal } from '@/state/journal-context'
 import { colors, spacing } from '@/theme/tokens'
 import { PrimaryButton, Screen, SecondaryButton } from '@/ui/components'
 import { formatConsumption, formatMoneyKopecks } from '@/ui/format'
 import { expenseCategoryLabel } from '@/ui/labels'
 
-/** Home dashboard — hero consumption, then cost/TO, then quick actions, then banner. */
+/** Home dashboard — hero consumption, then cost/TO, then quick actions. */
 export function HomeScreen() {
 	const router = useRouter()
 	const {
@@ -144,7 +143,7 @@ export function HomeScreen() {
 	if (vehicles.length === 0 || !activeVehicle) {
 		return (
 			<Screen>
-				<ScrollView>
+				<ScrollView style={styles.scroller}>
 					<Text style={styles.brand}>Автожурнал</Text>
 					<Text style={styles.subtitle}>
 						Добавьте автомобиль, чтобы вести заправки и расходы.
@@ -181,7 +180,10 @@ export function HomeScreen() {
 
 	return (
 		<Screen>
-			<ScrollView contentContainerStyle={{ paddingBottom: spacing.xl }}>
+			<ScrollView
+				style={styles.scroller}
+				contentContainerStyle={{ paddingBottom: spacing.xl }}
+			>
 				<Pressable onPress={() => router.push('/vehicles')}>
 					<Text style={styles.vehicleLabel}>Автомобиль</Text>
 					<Text style={styles.vehicleName}>{activeVehicle.displayName}</Text>
@@ -245,13 +247,6 @@ export function HomeScreen() {
 						onPress={() => router.push('/maintenance/edit')}
 					/>
 				</View>
-
-				{/* Banner below useful content and CTAs — never between metric and +Заправка. */}
-				<JournalBanner
-					visible
-					placement="home_banner"
-					remountKey={activeVehicle.id}
-				/>
 
 				<Text style={styles.section}>Последние записи</Text>
 				{recent.length === 0 ? (
@@ -361,6 +356,9 @@ function monthName(date: Date): string {
 }
 
 const styles = StyleSheet.create({
+	scroller: {
+		flex: 1,
+	},
 	brand: {
 		fontSize: 28,
 		fontWeight: '700',

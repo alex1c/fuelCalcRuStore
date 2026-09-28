@@ -2,11 +2,13 @@ import { useCallback, useEffect, useState } from 'react'
 import {
 	ActivityIndicator,
 	Alert,
+	Pressable,
 	ScrollView,
 	StyleSheet,
 	Text,
 	View,
 } from 'react-native'
+import { SymbolView } from 'expo-symbols'
 import { useRouter } from 'expo-router'
 import * as DocumentPicker from 'expo-document-picker'
 import {
@@ -25,6 +27,7 @@ import {
 import { buildShareReportText } from '@/export/share-report'
 import { kopecksToMajor } from '@/domain/shared/money'
 import { mlToLiters } from '@/domain/shared/volume'
+import { STORE_DEVELOPER_CATALOG_URL } from '@/config/store-links'
 import { backupFileName } from '@/persistence'
 import {
 	getNotificationPermissionStatus,
@@ -32,6 +35,7 @@ import {
 	type NotificationPermissionStatus,
 } from '@/notifications/reminders-service'
 import { getAnalyticsService } from '@/services/analytics'
+import { openExternalUrl } from '@/services/open-external-url'
 import {
 	shareLocalFile,
 	sharePlainText,
@@ -310,7 +314,10 @@ export function SettingsScreen() {
 
 	return (
 		<Screen>
-			<ScrollView contentContainerStyle={{ paddingBottom: spacing.xl }}>
+			<ScrollView
+				style={styles.scroller}
+				contentContainerStyle={{ paddingBottom: spacing.xl }}
+			>
 				<Text style={styles.title}>Настройки</Text>
 				<Text style={styles.meta}>
 					Активный автомобиль:{' '}
@@ -383,6 +390,27 @@ export function SettingsScreen() {
 					Активных с напоминанием: {maintenance.filter((item) => item.remind).length}
 				</Text>
 
+				<Text style={styles.section}>Приложения</Text>
+				<Pressable
+					accessibilityRole="link"
+					disabled={Boolean(busy)}
+					style={styles.linkRow}
+					onPress={() => {
+						void openExternalUrl(STORE_DEVELOPER_CATALOG_URL)
+					}}
+				>
+					<SymbolView
+						name={{
+							android: 'apps',
+							ios: 'square.grid.2x2',
+							web: 'apps',
+						}}
+						size={22}
+						tintColor={colors.accent}
+					/>
+					<Text style={styles.linkLabel}>Другие наши приложения</Text>
+				</Pressable>
+
 				{busy ? (
 					<View style={styles.busy}>
 						<ActivityIndicator color={colors.accent} />
@@ -414,6 +442,9 @@ function formatRuDate(iso: string): string {
 }
 
 const styles = StyleSheet.create({
+	scroller: {
+		flex: 1,
+	},
 	title: {
 		fontSize: 24,
 		fontWeight: '700',
@@ -436,6 +467,18 @@ const styles = StyleSheet.create({
 		marginTop: spacing.sm,
 		fontSize: 13,
 		color: colors.textMuted,
+	},
+	linkRow: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		justifyContent: 'center',
+		gap: spacing.sm,
+		paddingVertical: 12,
+	},
+	linkLabel: {
+		color: colors.accent,
+		fontSize: 15,
+		fontWeight: '600',
 	},
 	busy: {
 		marginTop: spacing.lg,

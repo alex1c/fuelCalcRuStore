@@ -8,16 +8,18 @@ import { env } from '@/config/env'
 export const YANDEX_DEMO_BANNER_UNIT_ID = 'demo-banner-yandex'
 export const YANDEX_DEMO_INTERSTITIAL_UNIT_ID = 'demo-interstitial-yandex'
 
-/** Product banner placements (share one banner unit id). */
-export type BannerPlacementId = 'home_banner' | 'stats_banner'
+/**
+ * Product banner placements (share one banner unit id).
+ * `shell_banner` is the single bottom slot under the navigator.
+ */
+export type BannerPlacementId = 'shell_banner'
 
 export type InterstitialPlacementId = 'stats_open'
 
 export type AdPlacementId = BannerPlacementId | InterstitialPlacementId
 
 export const PRODUCT_BANNER_PLACEMENTS: readonly BannerPlacementId[] = [
-	'home_banner',
-	'stats_banner',
+	'shell_banner',
 ] as const
 
 /** Max height (dp) for inline adaptive banners. */

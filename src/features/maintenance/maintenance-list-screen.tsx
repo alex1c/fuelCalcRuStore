@@ -42,6 +42,7 @@ export function MaintenanceListScreen() {
 		<Screen>
 			<Text style={styles.title}>Обслуживание</Text>
 			<FlatList
+				style={styles.list}
 				data={rows}
 				keyExtractor={(row) => row.item.id}
 				ListEmptyComponent={
@@ -121,6 +122,9 @@ function badgeColor(urgency: MaintenanceUrgency) {
 }
 
 const styles = StyleSheet.create({
+	list: {
+		flex: 1,
+	},
 	title: {
 		fontSize: 24,
 		fontWeight: '700',

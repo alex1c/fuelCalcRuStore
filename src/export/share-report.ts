@@ -4,6 +4,10 @@
  */
 
 import {
+	STORE_APP_LINK_LABEL,
+	STORE_APP_LISTING_URL,
+} from '@/config/store-links'
+import {
 	aggregateCosts,
 	calculateCostPerKm,
 	monthPeriod,
@@ -87,6 +91,12 @@ export function buildShareReportText(input: ShareReportInput): string {
 			`Стоимость: ${kopecksToMajor(costPerKm.costPerKmKopecks ?? 0).toFixed(2).replace('.', ',')} ₽/км`,
 		)
 	}
+
+	// Plain text has no hyperlink annotation. The caption is the user-facing
+	// label; the URL on its own line is what Android share targets auto-link.
+	lines.push('')
+	lines.push(STORE_APP_LINK_LABEL)
+	lines.push(STORE_APP_LISTING_URL)
 
 	return lines.join('\n')
 }

@@ -1,6 +1,7 @@
 import { Tabs } from 'expo-router'
-import { Text } from 'react-native'
+import { Text, type ColorValue } from 'react-native'
 import { colors } from '@/theme/tokens'
+import { TabSymbol, type TabIconName } from '@/ui/tab-symbol'
 
 function TabLabel({
 	label,
@@ -22,10 +23,43 @@ function TabLabel({
 	)
 }
 
-/** Bottom tabs: home / history / maintenance / stats / settings. */
+function tabOptions(label: string, icon: TabIconName) {
+	return {
+		title: label,
+		tabBarIcon: ({
+			color,
+			size,
+			focused,
+		}: {
+			color: ColorValue
+			size: number
+			focused: boolean
+		}) => (
+			<TabSymbol
+				name={icon}
+				color={color}
+				size={size}
+				focused={focused}
+			/>
+		),
+		tabBarLabel: ({ focused }: { focused: boolean }) => (
+			<TabLabel
+				label={label === 'Статистика' ? 'Стат.' : label}
+				focused={focused}
+			/>
+		),
+	}
+}
+
+/**
+ * Bottom tabs: home / history / maintenance / stats / settings.
+ * Bottom inset is 0 because the root shell draws the system inset
+ * under the banner, below this bar.
+ */
 export default function TabsLayout() {
 	return (
 		<Tabs
+			safeAreaInsets={{ bottom: 0 }}
 			screenOptions={{
 				headerStyle: { backgroundColor: colors.background },
 				headerShadowVisible: false,
@@ -35,55 +69,33 @@ export default function TabsLayout() {
 				tabBarStyle: {
 					backgroundColor: colors.surface,
 					borderTopColor: colors.border,
+					elevation: 0,
+					shadowOpacity: 0,
+					// Room for a 24dp glyph and an 11dp label. The system
+					// inset lives in the shell footer, under the banner.
+					height: 56,
 				},
-				// Text-only tabs — avoid default broken placeholder icons.
-				tabBarIcon: () => null,
 			}}
 		>
 			<Tabs.Screen
 				name="index"
-				options={{
-					title: 'Главная',
-					tabBarLabel: ({ focused }) => (
-						<TabLabel label="Главная" focused={focused} />
-					),
-				}}
+				options={tabOptions('Главная', 'home')}
 			/>
 			<Tabs.Screen
 				name="history"
-				options={{
-					title: 'История',
-					tabBarLabel: ({ focused }) => (
-						<TabLabel label="История" focused={focused} />
-					),
-				}}
+				options={tabOptions('История', 'history')}
 			/>
 			<Tabs.Screen
 				name="maintenance"
-				options={{
-					title: 'ТО',
-					tabBarLabel: ({ focused }) => (
-						<TabLabel label="ТО" focused={focused} />
-					),
-				}}
+				options={tabOptions('ТО', 'maintenance')}
 			/>
 			<Tabs.Screen
 				name="stats"
-				options={{
-					title: 'Статистика',
-					tabBarLabel: ({ focused }) => (
-						<TabLabel label="Стат." focused={focused} />
-					),
-				}}
+				options={tabOptions('Статистика', 'stats')}
 			/>
 			<Tabs.Screen
 				name="settings"
-				options={{
-					title: 'Ещё',
-					tabBarLabel: ({ focused }) => (
-						<TabLabel label="Ещё" focused={focused} />
-					),
-				}}
+				options={tabOptions('Ещё', 'more')}
 			/>
 		</Tabs>
 	)

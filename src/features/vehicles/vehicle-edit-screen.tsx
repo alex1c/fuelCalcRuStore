@@ -103,7 +103,8 @@ export function VehicleEditScreen() {
 			await refresh()
 			router.back()
 		} catch (err) {
-			Alert.alert('Ошибка', err instanceof Error ? err.message : 'Не удалось сохранить')
+			console.warn('[vehicle] save failed', err)
+			Alert.alert('Ошибка', 'Не удалось сохранить. Попробуйте ещё раз.')
 		} finally {
 			setSaving(false)
 		}
@@ -116,7 +117,7 @@ export function VehicleEditScreen() {
 
 		Alert.alert(
 			'Удалить автомобиль?',
-			'Заправки этого авто также будут удалены.',
+			'Заправки, расходы и записи ТО этого автомобиля также будут удалены.',
 			[
 				{ text: 'Отмена', style: 'cancel' },
 				{
@@ -124,9 +125,17 @@ export function VehicleEditScreen() {
 					style: 'destructive',
 					onPress: () => {
 						void (async () => {
-							await deleteVehicle(editingId)
-							await refresh()
-							router.back()
+							try {
+								await deleteVehicle(editingId)
+								await refresh()
+								router.back()
+							} catch (err) {
+								console.warn('[vehicle] delete failed', err)
+								Alert.alert(
+									'Ошибка',
+									'Не удалось удалить автомобиль. Попробуйте ещё раз.',
+								)
+							}
 						})()
 					},
 				},
@@ -136,7 +145,11 @@ export function VehicleEditScreen() {
 
 	return (
 		<Screen>
-			<ScrollView contentContainerStyle={{ paddingBottom: spacing.xl }}>
+			<ScrollView
+				style={styles.scroller}
+				keyboardShouldPersistTaps="handled"
+				contentContainerStyle={{ paddingBottom: spacing.xl }}
+			>
 				<Text style={styles.title}>
 					{editingId ? 'Редактирование' : 'Новый автомобиль'}
 				</Text>
@@ -196,6 +209,9 @@ export function VehicleEditScreen() {
 }
 
 const styles = StyleSheet.create({
+	scroller: {
+		flex: 1,
+	},
 	title: {
 		fontSize: 24,
 		fontWeight: '700',

@@ -30,7 +30,7 @@ type BannerAdSizeInstance = Awaited<
 type BannerViewComponent = YandexSdk['BannerView']
 
 /**
- * Inline adaptive banner slot. Isolates yandex-mobile-ads from product screens.
+ * Adaptive banner slot pinned by the app shell. Isolates yandex-mobile-ads.
  * Fail-open: load errors collapse the slot (no empty hole).
  */
 export function JournalBanner({
@@ -178,7 +178,6 @@ const styles = StyleSheet.create({
 	slot: {
 		alignItems: 'center',
 		justifyContent: 'center',
-		marginTop: 12,
 		overflow: 'hidden',
 		width: '100%',
 	},

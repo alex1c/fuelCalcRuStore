@@ -13,6 +13,7 @@ export function VehiclesScreen() {
 		<Screen>
 			<Text style={styles.title}>Автомобили</Text>
 			<FlatList
+				style={styles.list}
 				data={vehicles}
 				keyExtractor={(item) => item.id}
 				ListEmptyComponent={
@@ -67,6 +68,9 @@ export function VehiclesScreen() {
 }
 
 const styles = StyleSheet.create({
+	list: {
+		flex: 1,
+	},
 	title: {
 		fontSize: 24,
 		fontWeight: '700',

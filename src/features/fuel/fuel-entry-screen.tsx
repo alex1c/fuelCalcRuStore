@@ -255,7 +255,8 @@ export function FuelEntryScreen() {
 			await refresh()
 			router.back()
 		} catch (err) {
-			Alert.alert('Ошибка', err instanceof Error ? err.message : 'Не удалось сохранить')
+			console.warn('[fuel] save failed', err)
+			Alert.alert('Ошибка', 'Не удалось сохранить. Попробуйте ещё раз.')
 		} finally {
 			setSaving(false)
 		}
@@ -272,10 +273,18 @@ export function FuelEntryScreen() {
 				style: 'destructive',
 				onPress: () => {
 					void (async () => {
-						await deleteFuelEntry(editingId)
-						getAnalyticsService().track('fuel_entry_deleted')
-						await refresh()
-						router.back()
+						try {
+							await deleteFuelEntry(editingId)
+							getAnalyticsService().track('fuel_entry_deleted')
+							await refresh()
+							router.back()
+						} catch (err) {
+							console.warn('[fuel] delete failed', err)
+							Alert.alert(
+								'Ошибка',
+								'Не удалось удалить заправку. Попробуйте ещё раз.',
+							)
+						}
 					})()
 				},
 			},
@@ -285,6 +294,7 @@ export function FuelEntryScreen() {
 	return (
 		<Screen>
 			<ScrollView
+				style={styles.scroller}
 				keyboardShouldPersistTaps="handled"
 				contentContainerStyle={{ paddingBottom: spacing.xl }}
 			>
@@ -426,6 +436,9 @@ function fromLocalInput(raw: string): string | null {
 }
 
 const styles = StyleSheet.create({
+	scroller: {
+		flex: 1,
+	},
 	title: {
 		fontSize: 24,
 		fontWeight: '700',

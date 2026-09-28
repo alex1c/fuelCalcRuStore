@@ -136,7 +136,8 @@ export function ExpenseEditScreen() {
 			await refresh()
 			router.back()
 		} catch (err) {
-			Alert.alert('Ошибка', err instanceof Error ? err.message : 'Не удалось сохранить')
+			console.warn('[expense] save failed', err)
+			Alert.alert('Ошибка', 'Не удалось сохранить. Попробуйте ещё раз.')
 		} finally {
 			setSaving(false)
 		}
@@ -153,9 +154,17 @@ export function ExpenseEditScreen() {
 				style: 'destructive',
 				onPress: () => {
 					void (async () => {
-						await deleteExpense(editingId)
-						await refresh()
-						router.back()
+						try {
+							await deleteExpense(editingId)
+							await refresh()
+							router.back()
+						} catch (err) {
+							console.warn('[expense] delete failed', err)
+							Alert.alert(
+								'Ошибка',
+								'Не удалось удалить расход. Попробуйте ещё раз.',
+							)
+						}
 					})()
 				},
 			},
@@ -165,6 +174,7 @@ export function ExpenseEditScreen() {
 	return (
 		<Screen>
 			<ScrollView
+				style={styles.scroller}
 				keyboardShouldPersistTaps="handled"
 				contentContainerStyle={{ paddingBottom: spacing.xl }}
 			>
@@ -246,6 +256,9 @@ function fromDateInput(raw: string): string | null {
 }
 
 const styles = StyleSheet.create({
+	scroller: {
+		flex: 1,
+	},
 	title: {
 		fontSize: 24,
 		fontWeight: '700',

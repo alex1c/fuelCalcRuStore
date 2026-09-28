@@ -19,8 +19,7 @@ export type AnalyticsScreenName =
 export type ModeAnalyticsValue = 'journal'
 
 export type AdPlacementAnalyticsValue =
-	| 'home_banner'
-	| 'stats_banner'
+	| 'shell_banner'
 	| 'stats_open'
 
 export type AdFormatAnalyticsValue = 'banner' | 'interstitial'

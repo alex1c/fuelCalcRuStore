@@ -43,6 +43,7 @@ export class AppMetricaAnalyticsService implements AnalyticsService {
 	private readonly apiKey: string
 	private readonly loadSdk: AppMetricaSdkLoader
 	private activated = false
+	private activationFailed = false
 	private enabled = true
 	private sdk: AppMetricaModule | null | undefined
 
@@ -55,7 +56,7 @@ export class AppMetricaAnalyticsService implements AnalyticsService {
 	}
 
 	initialize(): void {
-		if (this.activated || this.apiKey.length === 0) {
+		if (this.activated || this.activationFailed || this.apiKey.length === 0) {
 			return
 		}
 
@@ -64,18 +65,23 @@ export class AppMetricaAnalyticsService implements AnalyticsService {
 			return
 		}
 
-		sdk.activate({
-			apiKey: this.apiKey,
-			sessionTimeout: 120,
-			locationTracking: false,
-			advIdentifiersTracking: false,
-			statisticsSending: this.enabled,
-			logs: typeof __DEV__ !== 'undefined' ? __DEV__ : false,
-			crashReporting: true,
-			firstActivationAsUpdate: false,
-		})
-
-		this.activated = true
+		try {
+			sdk.activate({
+				apiKey: this.apiKey,
+				sessionTimeout: 120,
+				locationTracking: false,
+				advIdentifiersTracking: false,
+				statisticsSending: this.enabled,
+				logs: typeof __DEV__ !== 'undefined' ? __DEV__ : false,
+				crashReporting: true,
+				firstActivationAsUpdate: false,
+			})
+			this.activated = true
+		} catch (err) {
+			// One failure must not retry activate on every later event.
+			this.activationFailed = true
+			console.warn('[analytics] AppMetrica activation failed', err)
+		}
 	}
 
 	track<Name extends AnalyticsEventName>(

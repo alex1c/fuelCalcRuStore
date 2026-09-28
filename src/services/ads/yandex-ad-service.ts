@@ -226,10 +226,11 @@ export class YandexAdService implements AdService {
 	}
 
 	private async isPolicyAllowed(): Promise<boolean> {
-		const [sessionCount, lastShownAtMs] = await Promise.all([
-			getAdSessionCount(),
-			getLastInterstitialShownAtMs(),
-		])
+		// Sequential on purpose: both reads go through the shared SQLite queue.
+		// Promise.all would still be serialized by that queue, but keeping the
+		// calls ordered matches the Android prepareAsync hotfix and stays obvious.
+		const sessionCount = await getAdSessionCount()
+		const lastShownAtMs = await getLastInterstitialShownAtMs()
 		const decision = evaluateInterstitialPolicy({
 			sessionCount,
 			lastShownAtMs,
