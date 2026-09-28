@@ -17,7 +17,7 @@ import {
 import { backupPreviewCounts, serializeBackup } from './serialize'
 
 /** App version stamped into backups (matches Expo config). */
-const APP_VERSION = '1.0.1'
+const APP_VERSION = '1.0.2'
 
 export async function buildBackupFromDatabase(
 	createdAt = new Date().toISOString(),
